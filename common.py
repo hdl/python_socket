@@ -13,10 +13,12 @@ def get_user_info():
     return user_db
 
 class Meeting:
-    def __init__(self):
-        self.begin_time = 0
-        self.duration = 0
+    def __init__(self, begin_time, duration, attendees):
+        self.begin_time = begin_time
+        self.duration = duration
+        self.attendees_str = attendees
         self.attendees = []
+
 
 class Oneday:
     def __init__(self,date):

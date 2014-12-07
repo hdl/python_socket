@@ -43,11 +43,27 @@ def display_upcoming(todo, connectionSocket, message):
     connectionSocket.send(str(todo))
     ack=connectionSocket.recv(1024)
     print ack
+
+def check_meeting(day, begin_time, duration):
+    if begin_time*10%5 != 0:
+        return "Begin time format wrong\n"
+    if duration*10%5 !=0:
+        return "Duration format wrong\n"
+    for meeting in day_list[day].meeting_list:
+        if meeting.begin_time<begin_time<meeting.begin_time+duration:
+            return "Time conflict(begin_time)\n"
+        if meeting.begin_time<begin_time+duration<meeting.begin_time+duration:
+            return "Time conflict(duration)\n"
+    return "OK"
 def schd_meeting(todo, connectionSocket, message):
-    print todo
-    connectionSocket.send(str(todo))
-    ack=connectionSocket.recv(1024)
-    print ack
+    day = int(message.split('#')[1])
+    begin_time = int(message.split('#')[2])
+    duration = int(message.split('#')[3])
+    attendees = message.split('#')[4]
+    reason = check_meeting(day, begin_time, duration)
+    if reason == 'OK':
+        day_list[day].meeting_list.append(Meeting(day, begin_time, attendees))
+    connectionSocket.send(reason)
 def modify_meeting(todo, connectionSocket, message):
     print todo
     connectionSocket.send(str(todo))
@@ -76,7 +92,7 @@ def main():
     serverSocket = socket(AF_INET, SOCK_STREAM)
     #Prepare a sever socket
     #bind the socket to host '' and port 7363
-    serverSocket.bind(('', 7363))
+    serverSocket.bind(('', 7364))
     #server starts to listen to incoming TCP requests
     serverSocket.listen(1)
     print "Start listeng..."

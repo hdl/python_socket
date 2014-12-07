@@ -39,10 +39,13 @@ def display_upcoming(todo, clientSocket):
     ack=clientSocket.recv(1024)
     print ack
 def schd_meeting(todo, clientSocket):
-    print todo
-    clientSocket.send(str(todo))
+    # the send format is todo#day#begin_time#duration 
+    clientSocket.send(str(todo)+"#1#2#3#John Elsa")
     ack=clientSocket.recv(1024)
-    print ack
+    if ack == "OK":
+        print "Meeting scheduled successfully."
+    else:
+        print "Meeting scheduled failed. Reason: "+ack
 def modify_meeting(todo, clientSocket):
     print todo
     clientSocket.send(str(todo))
@@ -96,7 +99,7 @@ def main():
     # Get the server hostname and port as command line arguments
     argv = sys.argv                      
     host = "127.0.0.1"
-    port = "7363"
+    port = "7364"
     
     print("This is a Room Booking App")
     user_name_g = prompt_user_name()
