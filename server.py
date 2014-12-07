@@ -24,25 +24,32 @@ user_db={}
 def display_all(todo, connectionSocket, message):
     ack_str="ack#"
     for day in range(14):
-        ack_str+=day_list[day].date+" not available slot: "
+        ack_str+=day_list[day].date+" scheduled slot: "
         for meeting in day_list[day].meeting_list:
-            ack_str = ack_str + str(meeting.begin_time)+"--"+str(meeting.begin_time+meeting.duration)+"  "
+            ack_str = ack_str + num2time(meeting.begin_time)+"-"+num2time(meeting.begin_time+meeting.duration)+"  "
         ack_str += '\n'
     print ack_str
     connectionSocket.send(ack_str)
 def display_oneday(todo, connectionSocket, message):
     day = int(message.split('#')[1])
     ack_str="ack#"
-    ack_str+=day_list[day].date+" not available slot: "
+    ack_str+=day_list[day].date+" scheduled slot: "
     for meeting in day_list[day].meeting_list:
-        ack_str = ack_str + str(meeting.begin_time)+"--"+str(meeting.begin_time+meeting.duration)+"  "
+        ack_str = ack_str + num2time(meeting.begin_time)+"-"+num2time(meeting.begin_time+meeting.duration)+"  "
     print ack_str
     connectionSocket.send(ack_str)
 def display_upcoming(todo, connectionSocket, message):
-    print todo
-    connectionSocket.send(str(todo))
-    ack=connectionSocket.recv(1024)
-    print ack
+    user_name = message.split("#")[1]
+    ack_str=""
+    for day in range(14):
+        ack_str+=day_list[day].date+": "
+        for meeting in day_list[day].meeting_list:
+            for user in meeting.attendees:
+                if user == user_name:
+                    ack_str = ack_str + str(meeting.begin_time)+"-"+str(meeting.begin_time+meeting.duration)+"  "
+        ack_str += '\n'
+    print ack_str
+    connectionSocket.send(ack_str)
 
 def check_meeting(day, begin_time, duration):
     if begin_time !=0:
@@ -68,15 +75,29 @@ def schd_meeting(todo, connectionSocket, message):
         day_list[day].meeting_list.append(Meeting(begin_time, duration, attendees))
     connectionSocket.send(reason)
 def modify_meeting(todo, connectionSocket, message):
-    print todo
-    connectionSocket.send(str(todo))
-    ack=connectionSocket.recv(1024)
-    print ack
+    day = int(message.split('#')[1])
+    meeting = int(message.split('#')[2])
+    begin_time = float(message.split('#')[3])
+    duration = float(message.split('#')[4])
+    attendees = message.split('#')[5]
+    reason = check_meeting(day, begin_time, duration)
+    if reason == 'OK':
+        day_list[day].meeting_list[meeting].begin_time = begin_time
+        day_list[day].meeting_list[meeting].duration=duration 
+        day_list[day].meeting_list[meeting].attendees_str=attendees 
+        day_list[day].meeting_list[meeting].update_attendees() 
+    connectionSocket.send(reason)
 def delete_meeting(todo, connectionSocket, message):
-    print todo
-    connectionSocket.send(str(todo))
-    ack=connectionSocket.recv(1024)
-    print ack
+    day=int(message.split("#")[1])
+    meeting=int(message.split("#")[2])
+    if day<0 or day>=14:
+        ack_str="Invalid day number"
+    if meeting<0 or meeting>=len(day_list[day].meeting_list):
+        ack_str="Invalid meeting number"
+    else:
+        del day_list[day].meeting_list[meeting]
+        ack_str="OK"
+    connectionSocket.send(ack_str)
 
 todo_func = { 1: display_all,
               2: display_oneday,

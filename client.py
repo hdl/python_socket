@@ -31,19 +31,20 @@ def display_oneday(todo, clientSocket):
         print str(i)+": "+date_str
     day = input("Please input the day number: ")
     print get_oneday(todo, clientSocket, day)
+    return day
 
 def display_upcoming(todo, clientSocket):
-    clientSocket.send(str(todo))
-    print todo
-    clientSocket.send(str(todo))
+    user_name = raw_input("Please input the name:")
+    clientSocket.send(str(todo)+"#"+user_name)
     ack=clientSocket.recv(1024)
+    print user_name+"'s meeting in next 2 weeks:"
     print ack
 def schd_meeting(todo, clientSocket):
     # the send format is todo#day#begin_time#duration
     day = raw_input("Please input day number:")
     begin_time = raw_input("Please input begin_time(e.g. 1:1AM, 1.5:1:30AM):")
     duration = raw_input("Please input duration(e.g. 1:1h, 1.5:1h30min):")
-    attendees = raw_input("Please input attendees name. Use space to break")
+    attendees = raw_input("Please input attendees name. Use space to break multiple users:")
     send_str = "#%s#%s#%s#%s" %(day, begin_time, duration, attendees)
     print send_str
     #clientSocket.send(str(todo)+"#1#2#3#John Elsa")
@@ -54,15 +55,26 @@ def schd_meeting(todo, clientSocket):
     else:
         print "Meeting scheduled failed. Reason: "+ack
 def modify_meeting(todo, clientSocket):
-    print todo
-    clientSocket.send(str(todo))
+    day=display_oneday(2, clientSocket)
+    meeting = raw_input("Please input meeting number(begin from 0):")
+    begin_time = raw_input("Please input new begin_time(e.g. 1:1AM, 1.5:1:30AM):")
+    duration = raw_input("Please input new duration(e.g. 1:1h, 1.5:1h30min):")
+    attendees = raw_input("Please input new attendees name. Use space to break multiple users:")
+    clientSocket.send(str(todo)+"#"+str(day)+"#"+meeting+"#"+begin_time+"#"+duration+"#"+attendees)
     ack=clientSocket.recv(1024)
-    print ack
+    if ack == "OK":
+        print "Meeting modified successfully."
+    else:
+        print "Meeting modified failed. Reason: "+ack
 def delete_meeting(todo, clientSocket):
-    print todo
-    clientSocket.send(str(todo))
+    day=display_oneday(2, clientSocket)
+    meeting = raw_input("Please input meeting number(begin from 0):")
+    clientSocket.send(str(todo)+"#"+str(day)+"#"+meeting)
     ack=clientSocket.recv(1024)
-    print ack
+    if ack == "OK":
+        print "Meeting deleted"
+    else:
+        print "Meeting delete failed. Reason: "+ack
 
 todo_func = { 1: display_all,
               2: display_oneday,
@@ -92,7 +104,7 @@ def prompt_todo():
         print "0: Quit"
         print "1: Display all the available slot"
         print "2: Display available slots in a specified day"
-        print "3: Show upcoming schedules"
+        print "3: Show a user's upcoming schedules"
         print "4: Schedule a meeting"
         print "5: Modify a meeting"
         print "6: Delete a meeting"
@@ -129,6 +141,7 @@ def main():
             break
         else:
             todo_func[todo](todo, clientSocket)
+        raw_input("Hit any key to continue")
     
     clientSocket.close()
     return 0
