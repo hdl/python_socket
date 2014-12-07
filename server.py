@@ -15,23 +15,83 @@ unique port number: 7363
 '''
 
 #import socket module
-from socket import * 
+from socket import *
+from common import *
+import datetime
 #create an inet, stream server socket
-serverSocket = socket(AF_INET, SOCK_STREAM)
+day_list=[]
+user_db={}
+def display_all(todo, connectionSocket, message):
+    ack_str="ack#"
+    for day in range(14):
+        ack_str+=day_list[day].date+" not available slot: "
+        for meeting in day_list[day].meeting_list:
+            ack_str = ack_str + str(meeting.begin_time)+"--"+str(meeting.begin_time+meeting.duration)+"  "
+        ack_str += '\n'
+    print ack_str
+    connectionSocket.send(ack_str)
+def display_oneday(todo, connectionSocket, message):
+    day = int(message.split('#')[1])
+    ack_str="ack#"
+    ack_str+=day_list[day].date+" not available slot: "
+    for meeting in day_list[day].meeting_list:
+        ack_str = ack_str + str(meeting.begin_time)+"--"+str(meeting.begin_time+meeting.duration)+"  "
+    print ack_str
+    connectionSocket.send(ack_str)
+def display_upcoming(todo, connectionSocket, message):
+    print todo
+    connectionSocket.send(str(todo))
+    ack=connectionSocket.recv(1024)
+    print ack
+def schd_meeting(todo, connectionSocket, message):
+    print todo
+    connectionSocket.send(str(todo))
+    ack=connectionSocket.recv(1024)
+    print ack
+def modify_meeting(todo, connectionSocket, message):
+    print todo
+    connectionSocket.send(str(todo))
+    ack=connectionSocket.recv(1024)
+    print ack
+def delete_meeting(todo, connectionSocket, message):
+    print todo
+    connectionSocket.send(str(todo))
+    ack=connectionSocket.recv(1024)
+    print ack
 
-#Prepare a sever socket
-#bind the socket to host '' and port 7363
-serverSocket.bind(('', 7363))
-#server starts to listen to incoming TCP requests
-serverSocket.listen(1)
+todo_func = { 1: display_all,
+              2: display_oneday,
+              3: display_upcoming,
+              4: schd_meeting,
+              5: modify_meeting,
+              6: delete_meeting,}
 
-#wait to accept a connection
-connectionSocket, addr = serverSocket.accept()
-while True:
-    message = connectionSocket.recv(1024)
-    connectionSocket.send("OK")
-    print message
+def init_day_list():
+    for i in range(14):
+        date_str = str(datetime.date.today() + datetime.timedelta(days=i))
+        day_list.append(Oneday(date_str))
+def main():
+    init_day_list()
+    user_db = get_user_info()
+    serverSocket = socket(AF_INET, SOCK_STREAM)
+    #Prepare a sever socket
+    #bind the socket to host '' and port 7363
+    serverSocket.bind(('', 7363))
+    #server starts to listen to incoming TCP requests
+    serverSocket.listen(1)
+    print "Start listeng..."
+    
+    #wait to accept a connection
+    connectionSocket, addr = serverSocket.accept()
+    while True:
+        message = connectionSocket.recv(1024)
+        print message
+        todo = int(message.split('#')[0])
+        todo_func[todo](todo, connectionSocket, message)
+    
+    connectionSocket.close()
+    serverSocket.close() 
 
-connectionSocket.close()
-serverSocket.close() 
+if __name__ == '__main__':
+    main()
 

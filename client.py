@@ -12,20 +12,28 @@ import sys, time
 from socket import *
 import datetime
 from common import *
-todo_g = 0
 user_name_g =""
+def get_oneday(todo, clientSocket, day):
+    clientSocket.send(str(todo)+"#"+str(day))
+    not_available=clientSocket.recv(1024)
+    return not_available.split('#')[1]
 
 def display_all(todo, clientSocket):
-    print todo
     clientSocket.send(str(todo))
-    ack=clientSocket.recv(1024)
-    print ack
-def display_in_a_day(todo, clientSocket):
-    print todo
-    clientSocket.send(str(todo))
-    ack=clientSocket.recv(1024)
-    print ack
+    not_available=clientSocket.recv(1024)
+    print not_available.split('#')[1]
+
+
+def display_oneday(todo, clientSocket):
+    print "Select one day:"
+    for i in range(14):
+        date_str = str(datetime.date.today() + datetime.timedelta(days=i))
+        print str(i)+": "+date_str
+    day = input("Please input the day number: ")
+    print get_oneday(todo, clientSocket, day)
+
 def display_upcoming(todo, clientSocket):
+    clientSocket.send(str(todo))
     print todo
     clientSocket.send(str(todo))
     ack=clientSocket.recv(1024)
@@ -47,7 +55,7 @@ def delete_meeting(todo, clientSocket):
     print ack
 
 todo_func = { 1: display_all,
-              2: display_in_a_day,
+              2: display_oneday,
               3: display_upcoming,
               4: schd_meeting,
               5: modify_meeting,
@@ -74,8 +82,8 @@ def prompt_todo():
         print "0: Quit"
         print "1: Display all the available slot"
         print "2: Display available slots in a specified day"
-        print "4: Show upcoming schedules"
-        print "3: Schedule a meeting"
+        print "3: Show upcoming schedules"
+        print "4: Schedule a meeting"
         print "5: Modify a meeting"
         print "6: Delete a meeting"
         todo=input("Please select a functionality and hit Enter: ")
