@@ -1,4 +1,6 @@
-
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 def get_user_info():
     user_db={}
     file = open("input.txt")
@@ -30,9 +32,15 @@ class Meeting:
         self.duration = duration
         self.attendees_str = attendees
         self.attendees = attendees.split()
+        self.send_email()
         print self.attendees
     def update_attendees(self):
         self.attendees = attendees.split()
+    def send_email(self):
+        user_db = get_user_info()
+        for name in self.attendees:
+            if user_db[name]:
+                you = user_db[name]
 
 
 class Oneday:
