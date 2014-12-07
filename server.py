@@ -80,12 +80,15 @@ def modify_meeting(todo, connectionSocket, message):
     begin_time = float(message.split('#')[3])
     duration = float(message.split('#')[4])
     attendees = message.split('#')[5]
+    if meeting<0 or meeting>=len(day_list[day].meeting_list):
+        ack_str="Invalid meeting number"
+        connectionSocket.send(ack_str)
+        return
+    else:
+        del day_list[day].meeting_list[meeting]
     reason = check_meeting(day, begin_time, duration)
     if reason == 'OK':
-        day_list[day].meeting_list[meeting].begin_time = begin_time
-        day_list[day].meeting_list[meeting].duration=duration 
-        day_list[day].meeting_list[meeting].attendees_str=attendees 
-        day_list[day].meeting_list[meeting].update_attendees() 
+        day_list[day].meeting_list.append(Meeting(begin_time, duration, attendees))
     connectionSocket.send(reason)
 def delete_meeting(todo, connectionSocket, message):
     day=int(message.split("#")[1])
