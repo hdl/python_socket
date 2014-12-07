@@ -104,8 +104,10 @@ def main():
     connectionSocket, addr = serverSocket.accept()
     while True:
         message = connectionSocket.recv(1024)
-        print message
+        print "msg:"+message
         todo = int(message.split('#')[0])
+        if todo == 0:
+            break;
         todo_func[todo](todo, connectionSocket, message)
     
     connectionSocket.close()

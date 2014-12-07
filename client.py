@@ -97,10 +97,11 @@ def prompt_todo():
         print "5: Modify a meeting"
         print "6: Delete a meeting"
         todo=input("Please select a functionality and hit Enter: ")
-        if int(todo)<7 and int(todo)>0:
+        if int(todo)<7 and int(todo)>=0:
             return todo
         else:
             print("Invalid input number, try again")
+            break;
 
 def main():
     # Get the server hostname and port as command line arguments
@@ -124,6 +125,7 @@ def main():
     while True:
         todo = prompt_todo()
         if todo == 0:
+            clientSocket.send("0#")
             break
         else:
             todo_func[todo](todo, clientSocket)
