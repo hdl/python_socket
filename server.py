@@ -46,11 +46,11 @@ def display_upcoming(todo, connectionSocket, message):
 
 def check_meeting(day, begin_time, duration):
     if begin_time !=0:
-        if begin_time*10%5 != 0:
+        if int(begin_time*10)%5 != 0:
             return "Begin time format wrong\n"
     if duration  == 0:
         return "Duration is zero\n"
-    if duration*10%5 !=0:
+    if int(duration*10)%5 !=0:
         return "Duration format wrong\n"
     for meeting in day_list[day].meeting_list:
         if meeting.begin_time<=begin_time<meeting.begin_time+duration:
@@ -60,8 +60,8 @@ def check_meeting(day, begin_time, duration):
     return "OK"
 def schd_meeting(todo, connectionSocket, message):
     day = int(message.split('#')[1])
-    begin_time = int(message.split('#')[2])
-    duration = int(message.split('#')[3])
+    begin_time = float(message.split('#')[2])
+    duration = float(message.split('#')[3])
     attendees = message.split('#')[4]
     reason = check_meeting(day, begin_time, duration)
     if reason == 'OK':

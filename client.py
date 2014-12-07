@@ -39,8 +39,15 @@ def display_upcoming(todo, clientSocket):
     ack=clientSocket.recv(1024)
     print ack
 def schd_meeting(todo, clientSocket):
-    # the send format is todo#day#begin_time#duration 
-    clientSocket.send(str(todo)+"#1#2#3#John Elsa")
+    # the send format is todo#day#begin_time#duration
+    day = raw_input("Please input day number:")
+    begin_time = raw_input("Please input begin_time(e.g. 1:1AM, 1.5:1:30AM):")
+    duration = raw_input("Please input duration(e.g. 1:1h, 1.5:1h30min):")
+    attendees = raw_input("Please input attendees name. Use space to break")
+    send_str = "#%s#%s#%s#%s" %(day, begin_time, duration, attendees)
+    print send_str
+    #clientSocket.send(str(todo)+"#1#2#3#John Elsa")
+    clientSocket.send(str(todo)+send_str)
     ack=clientSocket.recv(1024)
     if ack == "OK":
         print "Meeting scheduled successfully."
