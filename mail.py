@@ -1,18 +1,30 @@
+from email.mime.text import MIMEText
+from datetime import date
 import smtplib
 
-sender = 'from@fromdomain.com'
-receivers = ['maoze365@gmail.com']
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+SMTP_USERNAME = "maoze365@gmail.com"
+SMTP_PASSWORD = "Mao1991620@"
 
-message = """From: From Person <from@fromdomain.com>
-To: To Person <to@todomain.com>
-Subject: SMTP e-mail test
+EMAIL_FROM = "email@gmail.com"
+EMAIL_SUBJECT = "A meeting is schedule for you : "
 
-This is a test e-mail message.
-"""
+DATE_FORMAT = "%d/%m/%Y"
+EMAIL_SPACE = ", "
 
-try:
-    smtpObj = smtplib.SMTP('localhost')
-    smtpObj.sendmail(sender, receivers, message)         
-    print "Successfully sent email"
-except SMTPException:
-    print "Error: unable to send email"
+DATA='This is the content of the email.'
+
+def send_email(EMAIL_TO):
+    msg = MIMEText(DATA)
+    msg['Subject'] = EMAIL_SUBJECT + " %s" % (date.today().strftime(DATE_FORMAT))
+    msg['To'] = EMAIL_SPACE.join(EMAIL_TO)
+    msg['From'] = EMAIL_FROM
+    mail = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    mail.starttls()
+    mail.login(SMTP_USERNAME, SMTP_PASSWORD)
+    mail.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
+    mail.quit()
+
+if __name__=='__main__':
+    send_email()
