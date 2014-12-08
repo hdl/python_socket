@@ -4,8 +4,8 @@ import smtplib
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USERNAME = "maoze365@gmail.com"
-SMTP_PASSWORD = "Mao1991620@"
+SMTP_USERNAME = ""
+SMTP_PASSWORD = ""
 
 EMAIL_FROM = "email@gmail.com"
 EMAIL_SUBJECT = "A meeting is schedule for you : "
